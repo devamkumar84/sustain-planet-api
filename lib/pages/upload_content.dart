@@ -538,10 +538,10 @@ import '../widgets/article_preview.dart';
 //
 // }
 class Config{
-  final String appName = 'News Hour'; //app name
+  final String appName = 'Sustain Planet'; //app name
 
   //firebase server token for push notication
-  final String serverToken = 'AAAAc_HWoHs:APA91bGhyo3zdV-_hiYCj5P1JDciCmhDdsPZ923Ps8kJzwiTx0PMrXjMgZCid4jvNla0BM8L4FS0acWEshLY7pxmn9395c9zsRyk_XoEAnKmO-0N_VQnUEz8GU9tOVMc7vJK30vbyhDe';
+  final String serverToken = '';
   final String icon = 'assets/images/icon.png'; // app icon
 
 

@@ -589,6 +589,7 @@ class PostProvider extends ChangeNotifier {
     if(!_isHealthLoading){
       _isHealthLoading = true;
       fetchHealthArticle();
+      notifyListeners();
     }
   }
 
@@ -629,7 +630,68 @@ class PostProvider extends ChangeNotifier {
   }
 
   onFoodDataRefresh(){
+    _foodArticle.clear();
+    _isFoodLoading = true;
+    foodOffset = 0;
+    fetchFoodArticle();
+    notifyListeners();
+  }
+  void loadMoreFoodData(){
+    if(!_isFoodLoading){
+      _isFoodLoading = true;
+      fetchFoodArticle();
+      notifyListeners();
+    }
+  }
 
+  // Biodiversity Department
+  List<PostModel> _biodiversityArticle = [];
+  List<PostModel> get biodiversityArticle => _biodiversityArticle;
+
+  bool _isbioLoading = true;
+  bool get isBioLoading => _isbioLoading;
+
+  bool? _hasBioData;
+  bool? get hasBioData => _hasBioData;
+
+  int bioOffset = 0;
+  final int bioLimit = 4;
+  final String artCategory3 = 'Biodiversity';
+
+  Future<void> fetchBioArticle()async {
+    final url = "https://sustainplanet.org/sp_app/public/blog/datarecent?limit=$bioLimit&offset=$bioOffset&category=$artCategory3";
+    final response = await http.get(Uri.parse(url));
+    if(response.statusCode == 200){
+      if(response.body.isNotEmpty){
+        final List<dynamic> jsonResponse = jsonDecode(response.body);
+        final List<PostModel> fetchBioArticle = jsonResponse.map((postData){
+          return PostModel.fromJson(postData);
+        }).toList();
+        _biodiversityArticle.addAll(fetchBioArticle);
+        foodOffset += foodLimit;
+        _isbioLoading = false;
+      } else {
+        _isbioLoading = false;
+        _hasBioData = false;
+      }
+    }else {
+      _isbioLoading = false;
+      throw Exception('Failed to load biodiversity article');
+    }
+  }
+  onBioDataRefresh(){
+    _biodiversityArticle.clear();
+    _isbioLoading = true;
+    bioOffset = 0;
+    fetchBioArticle();
+    notifyListeners();
+  }
+  void loadMoreBioData(){
+    if(!_isbioLoading){
+      _isbioLoading = true;
+      fetchBioArticle();
+      notifyListeners();
+    }
   }
 
   // App Info
