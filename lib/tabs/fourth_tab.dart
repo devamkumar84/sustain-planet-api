@@ -2,8 +2,9 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import '../blocs/home_bloc.dart';
+import 'package:sustain_planet_api_app/blocs/home_bloc.dart';
 import '../utils/empty.dart';
 import '../utils/next_screen.dart';
 import '../utils/skeleton_loading.dart';
@@ -18,21 +19,18 @@ class FourthTabState extends State<FourthTab>{
   @override
   void initState() {
     super.initState();
-    if(mounted){
-      context.read().biodiversityData.isNotEmpty ? debugPrint('data already loaded'):
-      context.read().getBiodiversityData(mounted);
-    }
+      context.read<PostProvider>().fetchBioArticle();
   }
   @override
   Widget build(BuildContext context){
-    final hd = context.watch();
+    final hd = context.watch<PostProvider>();
     return RefreshIndicator(
       onRefresh: ()async{
-        context.read().onBioRefresh(mounted);
+        context.read<PostProvider>().onBioDataRefresh();
       },
       child: Container(
         height: MediaQuery.of(context).size.height,
-        color: Colors.black.withOpacity(.06),
+        color: Colors.grey[200],
         child: hd.hasBioData == false ?
         ListView(
           children: const [
@@ -47,10 +45,10 @@ class FourthTabState extends State<FourthTab>{
         ListView.builder(
             padding: const EdgeInsets.all(0),
           itemBuilder: (context, index){
-          if(hd.biodiversityData.length > index){
+          if(hd.biodiversityArticle.length != 0){
             return InkWell(
               onTap: (){
-                navigateToDetailsScreen(context, hd.biodiversityData[index], 'fourth${hd.biodiversityData[index].timestamp}');
+                navigateToDetailsScreen(context, hd.biodiversityArticle[index], 'fourth${hd.biodiversityArticle[index]}');
               },
               child: Container(
                 decoration: BoxDecoration(
@@ -66,9 +64,9 @@ class FourthTabState extends State<FourthTab>{
                         child: ClipRRect(
                           borderRadius: const BorderRadius.only(topLeft: Radius.circular(12),bottomLeft: Radius.circular(12)),
                           child: Hero(
-                            tag: 'fourth${hd.biodiversityData[index].timestamp}',
+                            tag: 'fourth${hd.biodiversityArticle[index]}',
                             child: CachedNetworkImage(
-                              imageUrl: hd.biodiversityData[index].thumbnailImagelUrl,
+                              imageUrl: hd.biodiversityArticle[index].postImage,
                               height: 120,
                               fit: BoxFit.cover,
                               placeholder: (context, url) => Container(color: Colors.grey[300]),
@@ -91,7 +89,7 @@ class FourthTabState extends State<FourthTab>{
                                     children: [
                                       const Icon(FontAwesomeIcons.clock,size: 13,color: Colors.grey,),
                                       const SizedBox(width: 4,),
-                                      Text(hd.biodiversityData[index].date,
+                                      Text(DateFormat('dd MMMM yy').format(hd.biodiversityArticle[index].postDate),
                                         style: const TextStyle(
                                             color: Colors.grey,
                                             fontWeight: FontWeight.w500,
@@ -99,14 +97,14 @@ class FourthTabState extends State<FourthTab>{
                                         ),)
                                     ],
                                   ),
-                                  Text(hd.biodiversityData[index].title,
+                                  Text(hd.biodiversityArticle[index].postTitle,
                                     style: const TextStyle(
                                         fontSize: 16,
                                         height: 1.2,
                                         fontWeight: FontWeight.w500
                                     ),overflow: TextOverflow.ellipsis,maxLines: 2,
                                   ),
-                                  Text(hd.biodiversityData[index].description,
+                                  Text(hd.biodiversityArticle[index].postContent,
                                     style: TextStyle(
                                         fontSize: 14,
                                         fontWeight: FontWeight.w400,
@@ -127,7 +125,7 @@ class FourthTabState extends State<FourthTab>{
           if(hd.isBioLoading){
             return Opacity(
                 opacity: 1.0,
-                child: hd.lastBioVisible == null ?
+                child: hd.bioOffset == 0 ?
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8,horizontal: 16),
                   child: SkeletonLoading(height: 150, color: Colors.grey[300]),
@@ -142,7 +140,7 @@ class FourthTabState extends State<FourthTab>{
           }
           return Container();
         },
-          itemCount: hd.biodiversityData.length != 0 ? hd.biodiversityData.length + 1 : 5,
+          itemCount: hd.biodiversityArticle.length + (hd.isBioLoading ? 4 : 0),
         ),
       ),
     );

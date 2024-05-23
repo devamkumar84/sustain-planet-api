@@ -2,8 +2,9 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import '../blocs/home_bloc.dart';
+import 'package:sustain_planet_api_app/blocs/home_bloc.dart';
 import '../utils/empty.dart';
 import '../utils/next_screen.dart';
 import '../utils/skeleton_loading.dart';
@@ -18,21 +19,18 @@ class FifthTabState extends State<FifthTab>{
   @override
   void initState() {
     super.initState();
-    if(mounted){
-      context.read().oceanData.isNotEmpty ? debugPrint('data already loaded'):
-      context.read().getOceanData(mounted);
-    }
+      context.read<PostProvider>().fetchOceanArticle();
   }
   @override
   Widget build(BuildContext context){
-    final hd = context.watch();
+    final hd = context.watch<PostProvider>();
     return RefreshIndicator(
       onRefresh: ()async{
-        context.read().onOceanRefresh(mounted);
+        context.read<PostProvider>().onRefreshOceanData();
       },
       child: Container(
         height: MediaQuery.of(context).size.height,
-        color: Colors.black.withOpacity(.06),
+        color: Colors.grey[200],
         child: hd.hasOceanData == false ?
         ListView(
           children: const [
@@ -45,10 +43,10 @@ class FifthTabState extends State<FifthTab>{
         ListView.builder(
             padding: const EdgeInsets.all(0),
           itemBuilder: (context, index){
-          if(hd.oceanData.length > index){
+          if(hd.oceanArticle.length != 0){
             return InkWell(
               onTap: (){
-                navigateToDetailsScreen(context, hd.oceanData[index], 'fifth${hd.oceanData[index].timestamp}');
+                navigateToDetailsScreen(context, hd.oceanArticle[index], 'fifth${hd.oceanArticle[index]}');
               },
               child: Container(
                   decoration: BoxDecoration(
@@ -65,7 +63,7 @@ class FifthTabState extends State<FifthTab>{
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
-                            Text(hd.oceanData[index].title,
+                            Text(hd.oceanArticle[index].postTitle,
                               style: const TextStyle(
                                 color: Colors.black87,
                                 fontWeight: FontWeight.w600,
@@ -75,7 +73,7 @@ class FifthTabState extends State<FifthTab>{
                               maxLines: 2,
                             ),
                             const SizedBox(height: 4,),
-                            Text(hd.oceanData[index].description,
+                            Text(hd.oceanArticle[index].postContent,
                               style: TextStyle(fontSize: 13,color: Colors.black.withOpacity(.9)),
                               overflow: TextOverflow.ellipsis,maxLines: 2,),
                             const SizedBox(height: 6,),
@@ -83,7 +81,7 @@ class FifthTabState extends State<FifthTab>{
                               children: [
                                 Icon(FontAwesomeIcons.clock,size: 15,color: Colors.black.withOpacity(.5)),
                                 const SizedBox(width: 6,),
-                                Text(hd.oceanData[index].date,
+                                Text(DateFormat('dd MMMM yy').format(hd.oceanArticle[index].postDate),
                                   style: TextStyle(
                                       fontSize: 13,color: Colors.black.withOpacity(.5),
                                       fontWeight: FontWeight.w500
@@ -100,9 +98,9 @@ class FifthTabState extends State<FifthTab>{
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(10),
                           child: Hero(
-                            tag: 'fifth${hd.oceanData[index].timestamp}',
+                            tag: 'fifth${hd.oceanArticle[index]}',
                             child: CachedNetworkImage(
-                              imageUrl: hd.oceanData[index].thumbnailImagelUrl,
+                              imageUrl: hd.oceanArticle[index].postImage,
                               fit: BoxFit.cover,
                               height: 104,
                               placeholder: (context, url) => Container(color: Colors.grey[300]),
@@ -119,10 +117,10 @@ class FifthTabState extends State<FifthTab>{
               ),
             );
           }
-          if(hd.isBioLoading){
+          if(hd.isOceanLoading){
             return Opacity(
                 opacity: 1.0,
-                child: hd.lastBioVisible == null ?
+                child: hd.oceanOffset == 0 ?
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8,horizontal: 16),
                   child: SkeletonLoading(height: 150, color: Colors.grey[300]),
@@ -137,7 +135,7 @@ class FifthTabState extends State<FifthTab>{
           }
           return Container();
         },
-          itemCount: hd.oceanData.length !=0 ? hd.oceanData.length : 5,
+          itemCount: hd.oceanArticle.length + (hd.isOceanLoading ? 4 : 0),
         ),
       ),
     );

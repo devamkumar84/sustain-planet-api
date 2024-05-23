@@ -20,12 +20,6 @@ class TabMediumState extends State<TabMedium>{
   @override
   void initState() {
     super.initState();
-    // final postProvider = Provider.of<PostProvider>(context, listen: false);
-    // widget.sc!.addListener(() {
-    //   if (widget.sc!.position.pixels == widget.sc!.position.maxScrollExtent) {
-    //     postProvider.loadMorePosts();
-    //   }
-    // });
     widget.sc!.addListener(_scrollListener);
   }
   void _scrollListener() {
@@ -34,47 +28,44 @@ class TabMediumState extends State<TabMedium>{
 
     if (sb.tabIndex == 0) {
       if (!db.isLoading) {
-        if (widget.sc!.position.pixels == widget.sc!.position.maxScrollExtent) {
-          db.loadMorePosts();
+        if (widget.sc!.offset >= widget.sc!.position.maxScrollExtent &&
+            !widget.sc!.position.outOfRange) {
+          db.loadMorePosts(true);
+          db.fetchPostsRecent();
         }
       }
     }
     else if(sb.tabIndex == 1){
       if (!db.isHealthLoading) {
-        if (widget.sc!.position.pixels == widget.sc!.position.maxScrollExtent) {
+        if (widget.sc!.offset >= widget.sc!.position.maxScrollExtent &&
+            !widget.sc!.position.outOfRange) {
           // db.setLoading(true);
           db.loadMoreHealthData();
         }
       }
     }
     else if(sb.tabIndex == 2){
-      // if (!db.isFoodLoading) {
-      //   if (widget.sc!.offset >= widget.sc!.position.maxScrollExtent &&
-      //       !widget.sc!.position.outOfRange) {
-      //     // print("reached the bottom");
-      //     db.setFoodLoading(true);
-      //     db.getFoodData(mounted);
-      //   }
-      // }
+      if (!db.isFoodLoading) {
+        if (widget.sc!.offset >= widget.sc!.position.maxScrollExtent &&
+            !widget.sc!.position.outOfRange) {
+          db.loadMoreFoodData();
+        }
+      }
     }
     else if(sb.tabIndex == 3){
-      // if (!db.isBioLoading) {
-      //   if (widget.sc!.offset >= widget.sc!.position.maxScrollExtent &&
-      //       !widget.sc!.position.outOfRange) {
-      //     // print("reached the bottom");
-      //     db.setBioLoading(true);
-      //     db.getBiodiversityData(mounted);
-      //   }
-      // }
+      if (!db.isBioLoading) {
+        if (widget.sc!.offset >= widget.sc!.position.maxScrollExtent &&
+            !widget.sc!.position.outOfRange) {
+          db.loadMoreBioData();
+        }
+      }
     }else if(sb.tabIndex == 4){
-      // if (!db.isOceanLoading) {
-      //   if (widget.sc!.offset >= widget.sc!.position.maxScrollExtent &&
-      //       !widget.sc!.position.outOfRange) {
-      //     // print("reached the bottom");
-      //     db.setOceanLoading(true);
-      //     db.getOceanData(mounted);
-      //   }
-      // }
+      if (!db.isOceanLoading) {
+        if (widget.sc!.offset >= widget.sc!.position.maxScrollExtent &&
+            !widget.sc!.position.outOfRange) {
+          db.loadMoreOceanData();
+        }
+      }
     }
 
   }

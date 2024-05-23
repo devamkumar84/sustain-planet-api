@@ -56,16 +56,8 @@ class RecentArticleState extends State<RecentArticle>{
             physics: const NeverScrollableScrollPhysics(),
             scrollDirection: Axis.vertical,
             itemBuilder: (_, int index) {
-              if (index == scb.postsRecent.length) {
-                return const Center(
-                  child: SizedBox(
-                    width: 32,
-                    height: 32,
-                    child: CupertinoActivityIndicator(),
-                  ),
-                );
-              }
-              return InkWell(
+              if(index < scb.postsRecent.length){
+                return InkWell(
                   onTap: (){
                     navigateToDetailsScreen(context, scb.postsRecent[index], 'recent$index');
                   },
@@ -174,6 +166,20 @@ class RecentArticleState extends State<RecentArticle>{
                         ],
                       )),
                 );
+              }
+              if(scb.isLoading){
+                return Opacity(
+                    opacity: 1.0,
+                    child: const Center(
+                      child: SizedBox(
+                        width: 32,
+                        height: 32,
+                        child: CupertinoActivityIndicator(),
+                      ),
+                    )
+                );
+              }
+              return Container();
             },
             separatorBuilder: (BuildContext context, int index) {
               return const SizedBox(height: 12);

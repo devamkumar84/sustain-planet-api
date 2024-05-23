@@ -46,7 +46,7 @@ class SecondTabState extends State<SecondTab>{
         ListView.builder(
           padding: const EdgeInsets.all(0),
           itemBuilder: (context, index) {
-            if(hd.healthArticle.length > 0){
+            if(hd.healthArticle.length != 0){
               return InkWell(
                 onTap: (){
                   navigateToDetailsScreen(context, hd.healthArticle[index], 'second${hd.healthArticle[index]}');
@@ -122,15 +122,22 @@ class SecondTabState extends State<SecondTab>{
             if(hd.isHealthLoading){
               return Opacity(
                   opacity: 1.0,
-                  child: Padding(
+                  child: hd.healthOffset == 0 ?
+                  Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8,horizontal: 16),
                     child: SkeletonLoading(height: 150, color: Colors.grey[300]),
+                  ): const Center(
+                    child: SizedBox(
+                      width: 32,
+                      height: 32,
+                      child: CupertinoActivityIndicator(),
+                    ),
                   )
               );
             }
             return Container();
           },
-          itemCount: hd.healthArticle.length,
+          itemCount: hd.healthArticle.length + (hd.isHealthLoading ? 4 : 0),
         ),
       ),
     );

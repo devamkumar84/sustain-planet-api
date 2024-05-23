@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../blocs/home_bloc.dart';
 import '../utils/empty.dart';
@@ -18,22 +19,19 @@ class ThirdTabState extends State<ThirdTab>{
   @override
   void initState() {
     super.initState();
-    if(mounted){
-      context.read().foodData.isNotEmpty ? debugPrint('data already loaded'):
-      context.read().getFoodData(mounted);
-    }
+      context.read<PostProvider>().fetchFoodArticle();
   }
   @override
   Widget build(BuildContext context){
-    final hd = context.watch();
+    final hd = context.watch<PostProvider>();
     return RefreshIndicator(
       onRefresh: ()async{
-        context.read().onFoodRefresh(mounted);
+        context.read<PostProvider>().onFoodDataRefresh();
       },
       child: Container(
         height: MediaQuery.of(context).size.height,
         width: MediaQuery.of(context).size.width,
-        color: Colors.black.withOpacity(.06),
+        color: Colors.grey[200],
         child: hd.hasFoodData == false ?
         ListView(
           children: const [
@@ -48,10 +46,10 @@ class ThirdTabState extends State<ThirdTab>{
         ListView.builder(
           padding: const EdgeInsets.all(0),
           itemBuilder: (context, index){
-            if(hd.foodData.length > index){
+            if(hd.foodArticle.length > 0){
               return InkWell(
                 onTap: (){
-                  navigateToDetailsScreen(context, hd.foodData[index], 'third${hd.foodData[index].timestamp}');
+                  navigateToDetailsScreen(context, hd.foodArticle[index], 'third${hd.foodArticle[index]}');
                 },
                 child: Container(
                   margin: const EdgeInsets.only(bottom: 6,top: 6),
@@ -76,9 +74,9 @@ class ThirdTabState extends State<ThirdTab>{
                               topRight: Radius.circular(14),
                             ),
                             child: Hero(
-                              tag: 'third${hd.foodData[index].timestamp}',
+                              tag: 'third${hd.foodArticle[index]}',
                               child: CachedNetworkImage(
-                                imageUrl: hd.foodData[index].thumbnailImagelUrl,
+                                imageUrl: hd.foodArticle[index].postImage,
                                 fit: BoxFit.cover,
                                 width: double.infinity,
                                 height: 150,
@@ -99,16 +97,16 @@ class ThirdTabState extends State<ThirdTab>{
                                   children: [
                                     const Icon(FontAwesomeIcons.clock,size: 13,color: Colors.grey,),
                                     const SizedBox(width: 6,),
-                                    Text(hd.foodData[index].date,style: const TextStyle(color: Colors.grey,fontSize: 13,
+                                    Text(DateFormat('dd MMMM yyy').format(hd.foodArticle[index].postDate),style: const TextStyle(color: Colors.grey,fontSize: 13,
                                         fontWeight: FontWeight.w500),)
                                   ],
                                 ),
-                                Text(hd.foodData[index].title,
+                                Text(hd.foodArticle[index].postTitle,
                                   style: const TextStyle(
                                       fontSize: 16,
                                       fontWeight: FontWeight.w500
                                   ),overflow: TextOverflow.ellipsis,maxLines: 2,),
-                                Text(hd.foodData[index].description,
+                                Text(hd.foodArticle[index].postContent,
                                   style: TextStyle(
                                       fontSize: 13,
                                       color: Colors.black.withOpacity(.8)
@@ -133,7 +131,7 @@ class ThirdTabState extends State<ThirdTab>{
             if(hd.isFoodLoading){
               return Opacity(
                   opacity: 1.0,
-                  child: hd.lastFoodVisible == null ?
+                  child: hd.foodOffset == 0 ?
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8,horizontal: 16),
                     child: SkeletonLoading(height: 150, color: Colors.grey[300]),
@@ -148,7 +146,7 @@ class ThirdTabState extends State<ThirdTab>{
             }
             return Container();
           },
-          itemCount: hd.foodData.length != 0 ? hd.foodData.length +1 : 5,
+          itemCount: hd.foodArticle.length + (hd.isFoodLoading ? 4 : 0),
         ),
       ),
     );

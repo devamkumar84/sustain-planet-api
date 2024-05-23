@@ -3,6 +3,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:http/http.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:http/http.dart' as http;
 
@@ -508,8 +509,10 @@ class PostProvider extends ChangeNotifier {
   bool _isLoading = true;
   bool get isLoading => _isLoading;
 
+
   int _offset = 0;
   final int _limit = 2; // Number of posts to load per request
+  PostModel? _lastFetchedPost;
 
   Future<void> fetchPostsRecent() async {
     final url = 'https://sustainplanet.org/sp_app/public/blog/datarecent?limit=$_limit&offset=$_offset';
@@ -517,29 +520,34 @@ class PostProvider extends ChangeNotifier {
 
     if (response.statusCode == 200) {
       final List<dynamic> jsonResponse = json.decode(response.body);
-      final List<PostModel> fetchedPosts = jsonResponse.map((postData) => PostModel.fromJson(postData)).toList();
-
-      _postsRecent.addAll(fetchedPosts);
-      _offset += _limit;
+      if (jsonResponse.isNotEmpty) {
+        final List<PostModel> fetchedPosts = jsonResponse.map((postData) => PostModel.fromJson(postData)).toList();
+        _lastFetchedPost = fetchedPosts.last;
+        _postsRecent.addAll(fetchedPosts);
+        _offset += _limit;
+      }
       _isLoading = false;
     } else {
       _isLoading = false;
-      // Handle errors here
       throw Exception('Failed to load posts');
     }
     notifyListeners();
   }
-  onRecentDataRefresh (){
+
+  void onRecentDataRefresh() {
     _postsRecent.clear();
     _offset = 0;
+    _lastFetchedPost = null;
     _isLoading = true;
     fetchPostsRecent();
     notifyListeners();
   }
-  void loadMorePosts() {
-    if (!_isLoading) {
-      _isLoading = true;
+
+  void loadMorePosts(bool moreData) {
+    if (moreData) {
       fetchPostsRecent();
+      _isLoading = true;
+      notifyListeners();
     }
   }
 
@@ -553,25 +561,25 @@ class PostProvider extends ChangeNotifier {
   bool? _hasHealthData;
   bool? get hasHealthData => _hasHealthData;
 
-  int _healthOffset = 0;
+  int healthOffset = 0;
   final int _healthLimit = 4;
   final String _artCategory = 'Health';
 
   Future<void> fetchHealthArticle() async{
-    final url = 'https://sustainplanet.org/sp_app/public/blog/datarecent?limit=$_healthLimit&offset=$_healthOffset&category=$_artCategory';
+    final url = 'https://sustainplanet.org/sp_app/public/blog/datarecent?limit=$_healthLimit&offset=$healthOffset&category=$_artCategory';
     final response = await http.get(Uri.parse(url));
 
     if(response.statusCode == 200){
-      if(response.body.isNotEmpty){
-        final List<dynamic> jsonResponse = jsonDecode(response.body);
+      final List<dynamic> jsonResponse = jsonDecode(response.body);
+      if(jsonResponse.isNotEmpty){
         final List<PostModel> fetchedPosts = jsonResponse.map((postData) => PostModel.fromJson(postData)).toList();
         _healthArticle.addAll(fetchedPosts);
-        _healthOffset += _healthLimit;
-        _isHealthLoading = false;
+        healthOffset += _healthLimit;
+        _hasHealthData = true;
       }else {
-        _hasHealthData = false;
-        _isHealthLoading = false;
+        _hasHealthData = healthOffset == 0 ? false : true;
       }
+      _isHealthLoading = false;
     }else {
       _isHealthLoading = false;
       throw Exception('Failed to Load post5');
@@ -580,16 +588,15 @@ class PostProvider extends ChangeNotifier {
   }
   onHealthDataRefresh(){
     _healthArticle.clear();
-    _healthOffset = 0;
     _isHealthLoading = true;
+    _hasHealthData = null;
+    healthOffset = 0;
     fetchHealthArticle();
     notifyListeners();
   }
   void loadMoreHealthData(){
     if(!_isHealthLoading){
-      _isHealthLoading = true;
       fetchHealthArticle();
-      notifyListeners();
     }
   }
 
@@ -612,16 +619,16 @@ class PostProvider extends ChangeNotifier {
     final response = await http.get(Uri.parse(url));
 
     if(response.statusCode == 200){
-      if(response.body.isNotEmpty){
-        final List<dynamic> jsonResponse = jsonDecode(response.body);
+      final List<dynamic> jsonResponse = jsonDecode(response.body);
+      if(jsonResponse.isNotEmpty){
         final List<PostModel> fetchFoodArticle = jsonResponse.map((postData) => PostModel.fromJson(postData)).toList();
         _foodArticle.addAll(fetchFoodArticle);
         foodOffset += foodLimit;
-        _isFoodLoading = false;
+        _hasFoodData = true;
       }else {
-        _isFoodLoading = false;
-        _hasFoodData = false;
+        _hasFoodData = foodOffset == 0 ? false : true;
       }
+      _isFoodLoading = false;
     }else {
       _isFoodLoading = false;
       throw Exception('Failed to load food Articles');
@@ -632,15 +639,14 @@ class PostProvider extends ChangeNotifier {
   onFoodDataRefresh(){
     _foodArticle.clear();
     _isFoodLoading = true;
+    _hasFoodData = null;
     foodOffset = 0;
     fetchFoodArticle();
     notifyListeners();
   }
   void loadMoreFoodData(){
     if(!_isFoodLoading){
-      _isFoodLoading = true;
       fetchFoodArticle();
-      notifyListeners();
     }
   }
 
@@ -662,35 +668,89 @@ class PostProvider extends ChangeNotifier {
     final url = "https://sustainplanet.org/sp_app/public/blog/datarecent?limit=$bioLimit&offset=$bioOffset&category=$artCategory3";
     final response = await http.get(Uri.parse(url));
     if(response.statusCode == 200){
-      if(response.body.isNotEmpty){
-        final List<dynamic> jsonResponse = jsonDecode(response.body);
+      final List<dynamic> jsonResponse = jsonDecode(response.body);
+      if(jsonResponse.isNotEmpty){
+        print(jsonResponse);
         final List<PostModel> fetchBioArticle = jsonResponse.map((postData){
           return PostModel.fromJson(postData);
         }).toList();
         _biodiversityArticle.addAll(fetchBioArticle);
-        foodOffset += foodLimit;
-        _isbioLoading = false;
+        bioOffset += bioLimit;
+        _hasBioData = true;
       } else {
-        _isbioLoading = false;
-        _hasBioData = false;
+        _hasBioData = bioOffset == 0 ? false : true;
       }
+      _isbioLoading = false;
     }else {
       _isbioLoading = false;
       throw Exception('Failed to load biodiversity article');
     }
+    notifyListeners();
   }
   onBioDataRefresh(){
     _biodiversityArticle.clear();
     _isbioLoading = true;
     bioOffset = 0;
+    _hasBioData = null;
     fetchBioArticle();
     notifyListeners();
   }
   void loadMoreBioData(){
     if(!_isbioLoading){
-      _isbioLoading = true;
       fetchBioArticle();
-      notifyListeners();
+    }
+  }
+
+  // Ocean Department
+  List<PostModel> _oceanArticle = [];
+  List<PostModel> get oceanArticle => _oceanArticle;
+
+  bool _isOceanLoading = true;
+  bool get isOceanLoading => _isOceanLoading;
+
+  bool? _hasOceanData;
+  bool? get hasOceanData => _hasOceanData;
+
+  int oceanOffset = 0;
+  final int oceanLimit = 4;
+  final String artCategory4 = 'Ocean';
+
+  Future<void> fetchOceanArticle() async {
+    final url = 'https://sustainplanet.org/sp_app/public/blog/datarecent?limit=$oceanLimit&offset=$oceanOffset&category=$artCategory4';
+    final response = await http.get(Uri.parse(url));
+
+    if (response.statusCode == 200) {
+      List<dynamic> jsonResponse = jsonDecode(response.body);
+      if (jsonResponse.isNotEmpty) {
+        List<PostModel> fetchOceanData = jsonResponse.map((artData) {
+          return PostModel.fromJson(artData);
+        }).toList();
+        _oceanArticle.addAll(fetchOceanData);
+        oceanOffset += oceanLimit;
+        _hasOceanData = true;
+      } else {
+        _hasOceanData = oceanOffset == 0 ? false : true;
+      }
+      _isOceanLoading = false;
+    } else {
+      _isOceanLoading = false;
+      throw Exception('Failed to load ocean data');
+    }
+    notifyListeners();
+  }
+
+  void onRefreshOceanData() {
+    _oceanArticle.clear();
+    _isOceanLoading = true;
+    _hasOceanData = null;
+    oceanOffset = 0;
+    fetchOceanArticle();
+    notifyListeners();
+  }
+
+  void loadMoreOceanData() {
+    if (!_isOceanLoading) {
+      fetchOceanArticle();
     }
   }
 

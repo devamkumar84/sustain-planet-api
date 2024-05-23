@@ -1,10 +1,8 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 import '../blocs/admin_bloc.dart';
 import '../blocs/home_bloc.dart';
-import '../blocs/signin_bloc.dart';
 import '../blocs/tab_index_bloc.dart';
 import '../services/app_service.dart';
 import '../utils/next_screen.dart';
@@ -30,9 +28,6 @@ class HomeScreenState extends State<HomeScreen> with  AutomaticKeepAliveClientMi
       context.read<TabIndexBloc>().setTabIndex(_tabController!.index);
     });
     Future.delayed(const Duration(milliseconds: 0)).then((value) async{
-      // context.read<HomeBloc>().getData();
-      // context.read<HomeBloc>().getPopularData();
-      // context.read<HomeBloc>().getRecentData(mounted);
       await AppService().checkInternet().then((hasInternet){
         if(hasInternet == false){
           openToast(context, 'No Internet');
