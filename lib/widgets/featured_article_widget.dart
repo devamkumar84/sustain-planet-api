@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_html/flutter_html.dart';
 import 'package:provider/provider.dart';
 
 import '../blocs/home_bloc.dart';
@@ -96,15 +97,31 @@ class FeaturedFeaturedArticleState extends State<FeaturedArticle>{
                         left: 8,
                         right: 8,
                         bottom: 6,
-                        child: Text(
-                          e.postContent,
-                          style: const TextStyle(
-                              fontSize: 14,
+                        child: Html(
+                          data: e.postContent,
+                          style: {
+                            "body": Style(
+                              margin: Margins.zero,
+                              height: Height(76),
+                              padding: HtmlPaddings.zero,
+                              fontSize: FontSize(14),
                               color: Colors.white,
-                              height: 1.2),
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 3,
-                        ))
+                              fontWeight: FontWeight.w400,
+                              maxLines: 3,
+                              textOverflow: TextOverflow.ellipsis,
+                            ),
+                          },
+                        ),
+                        // Text(
+                        //   e.postContent,
+                        //   style: const TextStyle(
+                        //       fontSize: 14,
+                        //       color: Colors.white,
+                        //       height: 1.2),
+                        //   overflow: TextOverflow.ellipsis,
+                        //   maxLines: 3,
+                        // )
+                    )
                   ],
                 ),
               ),

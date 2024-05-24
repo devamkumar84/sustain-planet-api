@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_html/flutter_html.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -103,34 +104,42 @@ class PopularArticleState extends State<PopularArticle>{
                               const SizedBox(
                                 height: 2,
                               ),
-                              Text(
-                                post.postContent,
-                                style: const TextStyle(
+                              Html(
+                                data: post.postContent,
+                                style: {
+                                  "body": Style(
+                                    margin: Margins.zero,
+                                    height: Height(40),
+                                    padding: HtmlPaddings.zero,
+                                    fontSize: FontSize(14),
+                                    color: Colors.black87,
                                     fontWeight: FontWeight.w400,
-                                    fontSize: 14),
-                                overflow: TextOverflow.ellipsis,
-                                maxLines: 1,
-                              ),
-                              const SizedBox(
-                                height: 4,
-                              ),
-                              Row(
-                                children: [
-                                  const FaIcon(
-                                    FontAwesomeIcons.clock,
-                                    size: 13,
-                                    color: Colors.grey,
+                                    maxLines: 2,
+                                    textOverflow: TextOverflow.ellipsis,
                                   ),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    DateFormat('dd MMMM yy').format(post.postDate),
-                                    style: const TextStyle(
-                                      fontSize: 13,
-                                      color: Colors.grey,
-                                    ),
-                                  ),
-                                ],
-                              )
+                                  "p,h1,h2,h3,h4,h5,h6": Style(margin: Margins.all(0)),
+                                },
+                              ),
+                              // const SizedBox(
+                              //   height: 4,
+                              // ),
+                              // Row(
+                              //   children: [
+                              //     const FaIcon(
+                              //       FontAwesomeIcons.clock,
+                              //       size: 13,
+                              //       color: Colors.grey,
+                              //     ),
+                              //     const SizedBox(width: 6),
+                              //     Text(
+                              //       DateFormat('dd MMMM yy').format(post.postDate),
+                              //       style: const TextStyle(
+                              //         fontSize: 13,
+                              //         color: Colors.grey,
+                              //       ),
+                              //     ),
+                              //   ],
+                              // )
                             ],
                           )),
                       const SizedBox(

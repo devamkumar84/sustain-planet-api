@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_html/flutter_html.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -135,14 +136,21 @@ class RecentArticleState extends State<RecentArticle>{
                           Padding(
                             padding: const EdgeInsets.only(
                                 left: 14, right: 14, top: 2),
-                            child: Text(
-                              scb.postsRecent[index].postContent,
-                              style: const TextStyle(
-                                  fontSize: 14,
+                            child: Html(
+                              data: scb.postsRecent[index].postContent,
+                              style: {
+                                "body": Style(
+                                  margin: Margins.zero,
+                                  height: Height(40),
+                                  padding: HtmlPaddings.zero,
+                                  fontSize: FontSize(14),
                                   color: Colors.black87,
-                                  fontWeight: FontWeight.w400),
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 1,
+                                  fontWeight: FontWeight.w400,
+                                  maxLines: 2,
+                                  textOverflow: TextOverflow.ellipsis,
+                                ),
+                                "p,h1,h2,h3,h4,h5,h6": Style(margin: Margins.all(0)),
+                              },
                             ),
                           ),
                           TextButton(
