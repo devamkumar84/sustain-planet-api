@@ -44,6 +44,9 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider<TabIndexBloc>(
             create: (context) => TabIndexBloc()
         ),
+        ChangeNotifierProvider<SignInBloc>(
+          create: (context) => SignInBloc(),
+        )
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
@@ -66,7 +69,7 @@ class SplashPage extends StatefulWidget {
 
 class _SplashPageState extends State<SplashPage> {
   afterSplash(){
-    // final SignInBloc sb = context.read<SignInBloc>();
+    final SignInBloc sb = context.read<SignInBloc>();
     Future.delayed(const Duration(milliseconds: 1500)).then((value){
       gotoHomePage();
 
@@ -74,12 +77,11 @@ class _SplashPageState extends State<SplashPage> {
   }
 
   gotoHomePage () {
-    // final SignInBloc sb = context.read<SignInBloc>();
-    // sb.getDataFromSp();
-    // if(FirebaseAuth.instance.currentUser!=null){
-    //   var uid = FirebaseAuth.instance.currentUser!.uid;
-    //   sb.getUserDatafromFirebase(uid);
-    // }
+    final SignInBloc sb = context.read<SignInBloc>();
+    if(sb.isSignedIn == true){
+    print(sb.isSignedIn);
+    sb.getDataFromSp();
+    }
     nextScreenReplace(context, HomePage());
     // Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=> HomePage()));
   }

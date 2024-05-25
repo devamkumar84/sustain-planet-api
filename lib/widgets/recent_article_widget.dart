@@ -21,7 +21,8 @@ class RecentArticleState extends State<RecentArticle>{
   @override
   Widget build(BuildContext context){
     final scb = context.watch<PostProvider>();
-    return Padding(
+    return Container(
+      color: Colors.white,
       padding: const EdgeInsets.symmetric(horizontal: 14),
       child: Column(
         children: [

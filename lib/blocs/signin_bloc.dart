@@ -1,11 +1,195 @@
 import 'dart:async';
+import 'dart:convert';
 
 // import 'package:cloud_firestore/cloud_firestore.dart';
 // import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+class SignInBloc extends ChangeNotifier {
+  SignInBloc(){
+    checkSignIn();
+    initPackageInfo();
+  }
+  final String defaultUserImageUrl = 'https://www.oxfordglobal.co.uk/nextgen-omics-series-us/wp-content/uploads/sites/16/2020/03/Jianming-Xu-e5cb47b9ddeec15f595e7000717da3fe.png';
+
+  String? _name;
+  String? get name => _name;
+
+  bool _isSignedIn = false;
+  bool get isSignedIn => _isSignedIn;
+
+  String? _id;
+  String? get id => _id;
+
+  String? _email;
+  String? get email => _email;
+
+  String? _imageUrl;
+  String? get imageUrl => _imageUrl;
+
+  String? _signInProvider;
+  String? get signInProvider => _signInProvider;
+
+  bool _hasError = false;
+  bool get hasError => _hasError;
+
+  String? timestamp;
+
+  String? _errorCode;
+  String? get errorCode => _errorCode;
+
+  String _appVersion = '0.0';
+  String get appVersion => _appVersion;
+
+  String _packageName = '';
+  String get packageName => _packageName;
+
+  Future setSignIn() async {
+    final SharedPreferences sp = await SharedPreferences.getInstance();
+    sp.setBool('signed_in', true);
+    _isSignedIn = true;
+    notifyListeners();
+  }
+  Future clearAllData() async {
+    final SharedPreferences sp = await SharedPreferences.getInstance();
+    sp.clear();
+  }
+  Future  afterUserSignOut ()async{
+    await clearAllData();
+    _isSignedIn = false;
+    notifyListeners();
+  }
+  void checkSignIn() async {
+    final SharedPreferences sp = await SharedPreferences.getInstance();
+    _isSignedIn = sp.getBool('signed_in') ?? false;
+    notifyListeners();
+  }
+  Future getTimestamp() async {
+    DateTime now = DateTime.now();
+    String timeStamp = DateFormat('yyyyMMddHHmmss').format(now);
+    timestamp = timeStamp;
+  }
+  void initPackageInfo() async {
+    try {
+      PackageInfo packageInfo = await PackageInfo.fromPlatform();
+      _appVersion = packageInfo.version;
+      _packageName = packageInfo.packageName;
+      notifyListeners();
+    } catch (e) {
+      print('Error fetching package info: $e');
+    }
+  }
+  Future signUpwithEmailPassword (userName,userEmail, userPassword) async{
+    try{
+      var url = Uri.parse('https://sustainplanet.org/sp_app/public/register');
+      var response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'name': userName,
+          'email': userEmail,
+          'password': userPassword,
+        }),
+      );
+      if (response.statusCode == 200) {
+        var responseData = jsonDecode(response.body) as Map<String, dynamic>;
+
+        if (responseData['message'] == 'User created successfully') {
+          print('Success: User created successfully');
+          _name = userName;
+          _id = responseData['user_id'].toString();
+          _imageUrl = defaultUserImageUrl;
+          _email = userEmail;
+          _signInProvider = 'email';
+          _isSignedIn = true;
+          _hasError = false;
+        } else {
+          print('Error123: ${responseData['message']}');
+          _errorCode = 'Invalid Credentials';
+          _hasError = true;
+        }
+      } else {
+        print('Error: Status code - ${response.statusCode}');
+        _errorCode = 'Invalid Credentials';
+        _hasError = true;
+      }
+    } catch (error) {
+      print('Try Error111: $error');
+      _errorCode = 'Invalid Credentials';
+      _hasError = true;
+    } finally {
+      notifyListeners();
+    }
+  }
+  Future<void> signInWithEmailPassword(String userEmail, String userPassword) async {
+    try {
+      var url = Uri.parse('https://sustainplanet.org/sp_app/public/login');
+      var response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'email': userEmail,
+          'password': userPassword,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        var responseData = jsonDecode(response.body) as Map<String, dynamic>;
+
+        if (responseData.containsKey('user')) {
+          print('Success: User signed in successfully');
+          _name = responseData['user']['name'];
+          _id = responseData['user']['id'].toString();
+          _imageUrl = responseData['user']['image_url'] ?? defaultUserImageUrl;
+          _email = responseData['user']['email'];
+          _signInProvider = 'email';
+          _isSignedIn = true;
+          _hasError = false;
+        } else {
+          print('Error: ${responseData['message']}');
+          _hasError = true;
+          _errorCode = responseData['message'];
+        }
+      } else {
+        print('Error: Status code - ${response.statusCode}');
+        _hasError = true;
+        _errorCode = 'Invalid credentials';
+      }
+    } catch (error) {
+      print('Try Error: $error');
+      _hasError = true;
+      _errorCode = error.toString();
+    } finally {
+      notifyListeners();
+    }
+  }
+  Future saveDataToSP() async {
+    final SharedPreferences sp = await SharedPreferences.getInstance();
+
+    await sp.setString('name', _name!);
+    await sp.setString('email', _email!);
+    await sp.setString('image_url', _imageUrl!);
+    await sp.setString('id', _id!);
+    await sp.setString('sign_in_provider', _signInProvider!);
+  }
+  Future getDataFromSp () async {
+    final SharedPreferences sp = await SharedPreferences.getInstance();
+    _name = sp.getString('name');
+    _email = sp.getString('email');
+    _imageUrl = sp.getString('image_url');
+    _id = sp.getString('id');
+    _signInProvider = sp.getString('sign_in_provider');
+    notifyListeners();
+  }
+}
 
 // class SignInBloc extends ChangeNotifier {
 //   SignInBloc(){
