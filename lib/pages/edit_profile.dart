@@ -124,30 +124,30 @@ class EditProfileState extends State<EditProfile>{
           });
         }):
         await uploadProfile().then((value){
-          // sb.updateUserProfile(userName.text, imagePath!).then((value){
-          //   ScaffoldMessenger.of(context).showSnackBar(
-          //     SnackBar(
-          //       content: Container(
-          //         alignment: Alignment.centerLeft,
-          //         height: 60,
-          //         child: const Text(
-          //           "Updated Successfully",
-          //           style: TextStyle(
-          //             fontSize: 14,
-          //           ),
-          //         ),
-          //       ),
-          //       action: SnackBarAction(
-          //         label: 'Ok',
-          //         textColor: Colors.blueAccent,
-          //         onPressed: () {},
-          //       ),
-          //     ),
-          //   );
-          //   setState(() {
-          //     loading = false;
-          //   });
-          // });
+          sb.updateUserProfile(userName.text, imagePath!).then((value){
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Container(
+                  alignment: Alignment.centerLeft,
+                  height: 60,
+                  child: const Text(
+                    "Updated Successfully",
+                    style: TextStyle(
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+                action: SnackBarAction(
+                  label: 'Ok',
+                  textColor: Colors.blueAccent,
+                  onPressed: () {},
+                ),
+              ),
+            );
+            setState(() {
+              loading = false;
+            });
+          });
         });
       }
     });

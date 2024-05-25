@@ -674,7 +674,7 @@ class GeneralSetting extends StatelessWidget{
         //       }),
         // ),
         // sb.isSignedIn == false ? Container() : const SecurityOption(),
-        Divider(thickness: 0.6,color: Colors.grey.withOpacity(.3),height: 10,),
+        // Divider(thickness: 0.6,color: Colors.grey.withOpacity(.3),height: 10,),
         ListTile(
           onTap: ()async{
             AppService().openLinkWithCustomTab(context, 'https://sustainplanet.org/contact-us/');

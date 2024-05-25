@@ -177,19 +177,72 @@ class SignInBloc extends ChangeNotifier {
     await sp.setString('id', _id!);
     await sp.setString('sign_in_provider', _signInProvider!);
   }
-  Future updateUserProfile(String profileName, String imagePath)async {
-    final url = 'https://sustainplanet.org/sp_app/public/profile/usernameUpdate';
-    final SharedPreferences sp = await SharedPreferences.getInstance();
-    FirebaseFirestore.instance.collection('users').doc(_uid).update({
-      'name': profileName,
-      'image url': imagePath
-    });
-    sp.setString('name', profileName);
-    sp.setString('image_url', imagePath);
-    _name = profileName;
-    _imageUrl = imagePath;
-    notifyListeners();
+  // Future updateUserProfile(String profileName, String imagePath)async {
+  //   final url = Uri.parse('https://sustainplanet.org/sp_app/public/profile/usernameUpdate');
+  //   final SharedPreferences sp = await SharedPreferences.getInstance();
+  //   sp.setString('name', profileName);
+  //   sp.setString('image_url', imagePath);
+  //   _name = profileName;
+  //   _imageUrl = imagePath;
+  //   notifyListeners();
+  // }
+  Future<void> updateUserProfile(String profileName, String? imagePath) async {
+    try {
+      final url = Uri.parse('https://sustainplanet.org/sp_app/public/profile/usernameUpdate');
+      final SharedPreferences sp = await SharedPreferences.getInstance();
+      final accessToken = sp.getString('access_token');
+
+      if (accessToken == null) {
+        print('Error: Missing access token');
+        _hasError = true;
+        return;
+      }
+
+      var request = http.MultipartRequest('POST', url)
+        ..headers['Authorization'] = 'Bearer $accessToken'
+        ..fields['name'] = profileName;
+
+      if (imagePath != null && imagePath.isNotEmpty) {
+        // Add image upload logic here
+        // ...
+      }
+
+      var response = await request.send();
+      var responseBody = await response.stream.bytesToString();
+
+      // Follow redirects if needed
+      if (response.statusCode == 302) {
+        // Extract the redirect URL from the response headers
+        final redirectUrl = response.headers['location'];
+        if (redirectUrl != null) {
+          request = http.MultipartRequest('POST', Uri.parse(redirectUrl))
+            ..fields['name'] = profileName;
+          // Add image upload logic again if needed
+          // ...
+          response = await request.send();
+          responseBody = await response.stream.bytesToString();
+        } else {
+          print('Error: Invalid redirect URL');
+          _hasError = true;
+          return;
+        }
+      }
+
+      // Check final response status code
+      if (response.statusCode == 200) {
+        // ... (process successful response as before)
+      } else {
+        print('Error: Status code - ${response.statusCode}');
+        _hasError = true;
+      }
+    } catch (error) {
+      print('Error: $error');
+      _hasError = true;
+    } finally {
+      notifyListeners();
+    }
   }
+
   Future getDataFromSp () async {
     final SharedPreferences sp = await SharedPreferences.getInstance();
     _name = sp.getString('name');
