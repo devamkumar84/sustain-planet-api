@@ -1,8 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-
-// import 'package:cloud_firestore/cloud_firestore.dart';
-// import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
@@ -179,6 +176,19 @@ class SignInBloc extends ChangeNotifier {
     await sp.setString('image_url', _imageUrl!);
     await sp.setString('id', _id!);
     await sp.setString('sign_in_provider', _signInProvider!);
+  }
+  Future updateUserProfile(String profileName, String imagePath)async {
+    final url = 'https://sustainplanet.org/sp_app/public/profile/usernameUpdate';
+    final SharedPreferences sp = await SharedPreferences.getInstance();
+    FirebaseFirestore.instance.collection('users').doc(_uid).update({
+      'name': profileName,
+      'image url': imagePath
+    });
+    sp.setString('name', profileName);
+    sp.setString('image_url', imagePath);
+    _name = profileName;
+    _imageUrl = imagePath;
+    notifyListeners();
   }
   Future getDataFromSp () async {
     final SharedPreferences sp = await SharedPreferences.getInstance();

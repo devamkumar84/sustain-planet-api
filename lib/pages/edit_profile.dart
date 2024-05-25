@@ -76,82 +76,82 @@ class EditProfileState extends State<EditProfile>{
       fileName = (imageFile!.path);
     });
   }
-  // Future uploadProfile() async {
-  //   final SignInBloc sb = context.read<SignInBloc>();
-  //   Reference storageReference = FirebaseStorage.instance.ref().child('Profile Pictures/${sb.uid}');
-  //   UploadTask uploadTask = storageReference.putFile(imageFile!);
-  //   await uploadTask.whenComplete(()async{
-  //     var url = await storageReference.getDownloadURL();
-  //     var imageUrl = url.toString();
-  //     setState(() {
-  //       imagePath = imageUrl;
-  //     });
-  //   });
-  // }
-  // handleUpdateDate()async {
-  //   final sb = context.read<SignInBloc>();
-  //   await AppService().checkInternet().then((hasInternet) async {
-  //     if(hasInternet == false){
-  //       openSnacbar(context, 'no internet');
-  //     }
-  //     else{
-  //       setState(() {
-  //         loading = true;
-  //       });
-  //       imageFile==null?
-  //       await sb.updateUserProfile(userName.text, imagePath!).then((value) {
-  //         ScaffoldMessenger.of(context).showSnackBar(
-  //           SnackBar(
-  //             content: Container(
-  //               alignment: Alignment.centerLeft,
-  //               height: 60,
-  //               child: const Text(
-  //                 "Updated Successfully",
-  //                 style: TextStyle(
-  //                   fontSize: 14,
-  //                 ),
-  //               ),
-  //             ),
-  //             action: SnackBarAction(
-  //               label: 'Ok',
-  //               textColor: Colors.blueAccent,
-  //               onPressed: () {},
-  //             ),
-  //           ),
-  //         );
-  //         setState(() {
-  //           loading = false;
-  //         });
-  //       }):
-  //       await uploadProfile().then((value){
-  //         sb.updateUserProfile(userName.text, imagePath!).then((value){
-  //           ScaffoldMessenger.of(context).showSnackBar(
-  //             SnackBar(
-  //               content: Container(
-  //                 alignment: Alignment.centerLeft,
-  //                 height: 60,
-  //                 child: const Text(
-  //                   "Updated Successfully",
-  //                   style: TextStyle(
-  //                     fontSize: 14,
-  //                   ),
-  //                 ),
-  //               ),
-  //               action: SnackBarAction(
-  //                 label: 'Ok',
-  //                 textColor: Colors.blueAccent,
-  //                 onPressed: () {},
-  //               ),
-  //             ),
-  //           );
-  //           setState(() {
-  //             loading = false;
-  //           });
-  //         });
-  //       });
-  //     }
-  //   });
-  // }
+  Future uploadProfile() async {
+    // final SignInBloc sb = context.read<SignInBloc>();
+    // Reference storageReference = FirebaseStorage.instance.ref().child('Profile Pictures/${sb.uid}');
+    // UploadTask uploadTask = storageReference.putFile(imageFile!);
+    // await uploadTask.whenComplete(()async{
+    //   var url = await storageReference.getDownloadURL();
+    //   var imageUrl = url.toString();
+    //   setState(() {
+    //     imagePath = imageUrl;
+    //   });
+    // });
+  }
+  handleUpdateDate()async {
+    final sb = context.read<SignInBloc>();
+    await AppService().checkInternet().then((hasInternet) async {
+      if(hasInternet == false){
+        openSnacbar(context, 'no internet');
+      }
+      else{
+        setState(() {
+          loading = true;
+        });
+        imageFile==null?
+        await sb.updateUserProfile(userName.text, imagePath!).then((value) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Container(
+                alignment: Alignment.centerLeft,
+                height: 60,
+                child: const Text(
+                  "Updated Successfully",
+                  style: TextStyle(
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+              action: SnackBarAction(
+                label: 'Ok',
+                textColor: Colors.blueAccent,
+                onPressed: () {},
+              ),
+            ),
+          );
+          setState(() {
+            loading = false;
+          });
+        }):
+        await uploadProfile().then((value){
+          // sb.updateUserProfile(userName.text, imagePath!).then((value){
+          //   ScaffoldMessenger.of(context).showSnackBar(
+          //     SnackBar(
+          //       content: Container(
+          //         alignment: Alignment.centerLeft,
+          //         height: 60,
+          //         child: const Text(
+          //           "Updated Successfully",
+          //           style: TextStyle(
+          //             fontSize: 14,
+          //           ),
+          //         ),
+          //       ),
+          //       action: SnackBarAction(
+          //         label: 'Ok',
+          //         textColor: Colors.blueAccent,
+          //         onPressed: () {},
+          //       ),
+          //     ),
+          //   );
+          //   setState(() {
+          //     loading = false;
+          //   });
+          // });
+        });
+      }
+    });
+  }
   @override
   void initState() {
     super.initState();
@@ -206,7 +206,7 @@ class EditProfileState extends State<EditProfile>{
                       width: MediaQuery.of(context).size.width,
                       child: ElevatedButton(
                           onPressed: (){
-                            // handleUpdateDate();
+                            handleUpdateDate();
                           },
                           style: ElevatedButton.styleFrom(
                             shape: RoundedRectangleBorder(
